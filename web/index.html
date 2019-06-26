@@ -44,21 +44,45 @@ section#Slots{
 	border-radius: 15px;
 	background-color: #FAFAFA;
 }
-section#Gira{
-	margin-top: 25px;
-	padding-top: 25px;
-	padding-bottom: 25px;
+section#Action{
+	margin-top: 5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
 	border-radius: 5px;
 	text-align: center;
 	background-color: #AB47BC;
 	color: #FFFFFF;
 	font-size: 25px;
 }
-section#Gira:hover{
+.Gira{
+	display: inline-block;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	padding-top: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+	border-radius: 5px;	
+	background-size: 150px;
+	width: 150px;
+	height: 50px;
+}
+.Gira:hover{
 	background-color: #BA68C8;
 }
+section#balance{
+	margin-top: 5px;
+	margin-bottom: 10px;
+	padding-top: 25px;
+	padding-bottom: 25px;
+	border-radius: 5px;
+	text-align: center;
+	background-color: #37474F;
+	color: #FFFFFF;
+	font-size: 25px;
+	font-family: 'Roboto Mono', monospace;
+}
 section#options{
-	margin-top: 20px;
+	margin-top: 10px;
 	padding-top: 5px;
 	border-radius: 5px;
 	background-color: #C62828;
@@ -107,7 +131,7 @@ section#info{
 .a6{
 	background-image: url("res/tiles/spade.png");
 }
-.a7{
+.a0{
 	background-image: url("res/tiles/joker.png");
 }
 </style>
@@ -118,13 +142,18 @@ section#info{
 <html>
 <body onload="toggleAudio()">
 <main>
-	<section id="status">WELCOME!</section>
+	<section id="status">WELCOME! Please Login</section>
 	<section id="Slots">
 		<div id="slot1" class="a1"></div>
 		<div id="slot2" class="a1"></div>
 		<div id="slot3" class="a1"></div>
 	</section>
-	<section onclick="doSlot()" id="Gira">TAKE A SPIN!</section>
+	<section id="Action">
+		<div id="login" class="Gira">LOGIN</div>
+		<div id="play" class="Gira">TAKE A SPIN</div>
+		<div id="logout" class="Gira">LOGOUT</div>
+	</section>
+	<section id="balance"></section>
 	<section id="options">
 		<img src="res/icons/audioOn.png" id="audio" class="option" onclick="toggleAudio()" />
 	</section>
@@ -144,8 +173,18 @@ var coin = [new Audio("res/sounds/coin.mp3"),new Audio("res/sounds/coin.mp3"),ne
 var win = new Audio("res/sounds/win.mp3");
 var lose = new Audio("res/sounds/lose.mp3");
 var audio = false;
-let status = document.getElementById("status")
+let status = elem("status");
 var info = true;
+
+function elem(id) {
+	return document.getElementById(id);
+}
+
+elem("login").addEventListener('click',(e) => { login();}, false);
+elem("play").addEventListener('click',(e) => { doSlot();}, false);
+elem("logout").addEventListener('click',(e) => { logout();}, false);
+
+setInterval(() => {setMemberStatus();}, 3000);
 
 function doSlot(){
 	if (doing){return null;}
@@ -154,73 +193,68 @@ function doSlot(){
 	var i2 = 0;
 	var i3 = 0;
 	var sound = 0;
-	var numChanges = 1000;
+	var numChanges = 7;
 	var numberSlot1,numberSlot2,numberSlot3;
+	var netResult="";
 	
-	play("1.0000 EOS", result=>{
-		status.innerHTML = "SPINNING"
-		
-		numberSlot1 = numChanges+randomInt(1,7)
-		numberSlot2 = numChanges+2*7+randomInt(1,7)
-		numberSlot3 = numChanges+4*7+randomInt(1,7)
+	play("1.0000 EOS", (result) =>{
+		netResult = result;
+		parseResult = result.split(":");
+		number = parseInt(parseResult[1]);
+		status.innerText = "SPINNING";
+		numberSlot3 = (number%10)+35;
+		numberSlot2 = (Math.floor(number/10)%10)+21;
+		numberSlot1 = (Math.floor(number/100)%10)+7;
 		slot1 = setInterval(spin1, 50);
 		slot2 = setInterval(spin2, 50);
-		slot3 = setInterval(spin3, 50);}
+		slot3 = setInterval(spin3, 50);
+		}
 	);
 
 	function spin1(){
 		i1++;
-		if (i1>=numberSlot1){
+		if (i1>numberSlot1){
 			coin[0].play()
 			clearInterval(slot1);
 			return null;
 		}
 		slotTile = document.getElementById("slot1");
-		if (slotTile.className=="a7"){
-			slotTile.className = "a0";
-		}
-		slotTile.className = "a"+(parseInt(slotTile.className.substring(1))+1)
+		slotTile.className = "a"+(i1%7);
 	}
 	function spin2(){
 		i2++;
-		if (i2>=numberSlot2){
+		if (i2>numberSlot2){
 			coin[1].play()
 			clearInterval(slot2);
 			return null;
 		}
 		slotTile = document.getElementById("slot2");
-		if (slotTile.className=="a7"){
-			slotTile.className = "a0";
-		}
-		slotTile.className = "a"+(parseInt(slotTile.className.substring(1))+1)
+		slotTile.className = "a"+(i2%7);
 	}
 	function spin3(){
 		i3++;
-		if (i3>=numberSlot3){
+		if (i3>numberSlot3){
 			coin[2].play()
 			clearInterval(slot3);
-			showResult();
+			showResult(netResult);
 			return null;
 		}
 		slotTile = document.getElementById("slot3");
-		if (slotTile.className=="a7"){
-			slotTile.className = "a0";
-		}
 		sound++;
 		if (sound==spin.length){
 			sound=0;
 		}
 		spin[sound].play();
-		slotTile.className = "a"+(parseInt(slotTile.className.substring(1))+1)
+		slotTile.className = "a"+(i3%7);
 	}
 }
 
-function showResult(result){
-	if (result.indexOf("won")>-1) {
-		status.innerHTML = "YOU WIN!";
+function showResult(netResult){
+	if (netResult.indexOf("won")>-1) {
+		status.innerText = "YOU WIN!";
 		win.play();
 	}else{
-		status.innerHTML = "YOU LOSE!"
+		status.innerText = "YOU LOSE!"
 		lose.play();
 	}
 	doing = false;
@@ -271,25 +305,45 @@ function randomInt(min, max){
 	ScatterJS.connect('koin4dapp', {network}).then(connected => {
 		if(!connected) return console.error('no scatter');
 		
-		scatter = ScatterJS.scatter;	
+		scatter = ScatterJS.scatter;
+		if (scatter.identity) {
+			status.innerText= "Welcome " + getAccountName();
+		}
 		scatterConnect = ScatterJS.eos(network, Eos);
 	});	
 
 	function login() {
-		ScatterJS.login().then(id => {
-			if(!id) return console.error('no identity');
-				elem("accountname").innerText= getAccountName();
-			}).catch(err => {
-				console.error('error: ', err);
-			});
+		if (scatter) {
+			ScatterJS.login().then(id => {
+				if(!id) return console.error('no identity');
+					status.innerText= "Welcome " + getAccountName();
+				}).catch(err => {
+					console.error('error: ', err);
+				});
+		} else {
+			alert("No Scatter detected!");
+		}
 	}
 	
 	function logout() {
-		if (scatter.identity) {
-			(async () => {
-				await scatter.forgetIdentity();
-				elem("accountname").innerText= "~";
-			})();
+		if (scatter) {
+			if (scatter.identity) {
+				(async () => {
+					await scatter.forgetIdentity();
+					status.innerText= "Welcome ! Please login";
+				})();
+			}
+		} else {		
+			alert("No Scatter detected!");
+		}
+	}
+	
+	function setMemberStatus() {
+		if (scatter) {
+			if(scatter.identity) {
+				if (!doing) //pending show balance on Spin
+					getCurrencyBalance("eosio.token",getAccountName(),"EOS", (x) =>{if (x) {elem("balance").innerText = "Your Balance: " + x}});
+			}
 		}
 	}
 	
@@ -306,6 +360,20 @@ function randomInt(min, max){
 		else
 			return "unknown";
 	}
+	
+	function getCurrencyBalance(contract, name, symbol, callback, callbackerror) {
+		var retvalue;
+		scatterConnect.getCurrencyBalance(
+			contract,name,symbol
+		).then(result => {
+		  callback(result[0]);
+		}).catch(error => {
+		  if (callbackerror)
+			callbackerror();
+		  else
+			console.log('error:'+JSON.stringify(error));
+		});
+	}	
 	
 	function error2String(obj) {
 		if (typeof obj === 'string' || obj instanceof String) 
@@ -350,11 +418,12 @@ function randomInt(min, max){
 						memo: 'play ' + quantity
 					}
 				}
-		], function(result){			
+		], function(result){
+			console.log(JSON.stringify(result));
 			const logger = elem("logger");
-			logger.innerText = JSON.stringify(result);
-			traces0 = result.processed.action_traces[0].inline_traces[0];			
-			callback(traces0.act.data.memo);
+			traces2 = result.processed.action_traces[0].inline_traces[2];
+			memo = traces2.act.data.memo;
+			callback(memo);
 			}
 		);
 	}
