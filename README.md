@@ -14,6 +14,7 @@ created by koin4dapp.appspot.com
 5. Receive EOS token and execute action
 6. Create random number
 7. Secure your smart contract from rollback attack
+8. Frontend Web Integration using Scatter-JS (please visit https://github.com/koin4dapp/slotmachine1)
 
 ## How to use:
 
@@ -98,16 +99,18 @@ void slotmachine1::spin( name user,
         || (slot1==slot2 && slot1==7)
         || (slot1==slot3 && slot1==7)
         || (slot2==slot3 && slot2==7))
-      double sign = 8; //payback (7*7*7)/(7*6)=8x
+      sign = 8; //payback (7*7*7)/(7*6)=8x
 
     eosio::asset payback = eosio::asset(sign*quantity.amount,quantity.symbol);
     
-    std::string feedback = " SPIN result:" + std::to_string(slot1*100+slot2*10+slot3);
+    std::string feedback = " SPIN result:" + std::to_string(slot1*100+slot2*10+slot3) 
+      + " you " + (payback.amount>0?"won":"loss");
     
     eosio::print(feedback+"\n");
 
     send_notify(user, feedback);
-    send_settle(user, payback, feedback);
+    if (payback.amount > 0)
+      send_settle(user, payback, feedback);
 }
 ```
 4. Check if game enabled
@@ -298,12 +301,81 @@ your can run several time for enough EOS to buy RAM
 5. Bookmark your account name (eg. slotmachine1)
 6. Compile your smart contract
 7. Buy RAM min 11x wasm binary file size
+```
+Send Transfer
+Tx:8a7c5c
+Jun-25-2019, 16:25:48
+slotmachine1 → eosio.ramfee 0.0621 EOS
+,
+
+MEMO: ram fee
+
+Send Transfer
+Tx:8a7c5c
+Jun-25-2019, 16:25:48
+slotmachine1 → eosio.ram 10.4032 EOS
+,
+
+MEMO: buy ram
+
+Buy RAM Bytes
+Tx:8a7c5c
+Jun-25-2019, 16:25:48
+slotmachine1 bought 519400 bytes of RAM for slotmachine1
+```
 8. Set your account permission to eosio.code
-9. Deploy to your account
-10. Bookmark your smart contract
+```
+Update Auth
+Tx:d93b69
+Jun-25-2019, 16:25:07
+Configuration:
+
+account:    slotmachine1
+permission: active
+parent:     owner
+auth: 
+  threshold: 1
+  keys: 
+    - 
+      key:    EOS6RhqBP44jfX8F6FLc7pFPZ3eo92QXARYjUqtSZm2vzgYYTAMRg
+      weight: 1
+  accounts: 
+    - 
+      permission: 
+        actor:      slotmachine1
+        permission: eosio.code
+      weight:     1
+  waits: 
+    (empty array)
+```
+9. Deploy to your account (eg. slotmachine1)
+```
+Set ABI
+Tx:c522e1
+Jun-25-2019, 16:30:45
+Contract ABI deployed to slotmachine1
+
+account: slotmachine1
+abi:     0e656f73696f3a3a6162... (hash)
+
+,
+Set Code
+Tx:7b7c59
+Jun-25-2019, 16:30:42
+Contract code deployed to slotmachine1
+
+account:   slotmachine1
+vmtype:    0
+vmversion: 0
+code:      0061736d0100000001f8... (hash)
+```
+10. Bookmark your smart contract (eg. slotmachine1)
 11. Run initial action and set enabled to 1
 ```
-txid: xxxx
+slotmachine1: initgame
+slotmachine1 (contract) processed the following data
+
+enabled: 1
 ```
 12. Check your smart contract at Kylin Testnet
 ```
@@ -330,7 +402,7 @@ your can run several time for enough EOS to buy RAM
 4. Bookmark your account name (eg. slotmachine2)
 5. Change account to slotmachine2
 6. Change contract to eosio.token
-7. Transfer 1.0000 EOS from slotmachine2 to slotmachine2
+7. Transfer 1.0000 EOS from slotmachine2 to slotmachine1
 ```
 txid: xxx
 ```
