@@ -15,6 +15,7 @@ created by koin4dapp.appspot.com
 6. Create random number
 7. Secure your smart contract from rollback attack
 8. Frontend Web Integration using Scatter-JS (please visit https://github.com/koin4dapp/slotmachine1)
+9. Frontend Web Integration using Lynx-Wallet (please visit https://github.com/koin4dapp/slotmachine1)
 
 ## How to use:
 
