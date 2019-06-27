@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<head>
+	<title>Slot Machine</title>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+a{
+	color: #283593;
+	text-decoration: none;
+}
+h3{
+	margin-top: 12px;
+}
+*{
+	margin:0px;
+}
+body{
+	background-color: #424242;
+	font-family: 'Roboto', sans-serif;
+}
+main{
+	border-radius: 5px;
+	background-color: #EF5350;
+	margin-top: 30px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-left: calc((100% - 580px) / 2);
+	width: 550px;
+}
+section#status{
+	margin-bottom: 25px;
+	padding-top: 25px;
+	padding-bottom: 25px;
+	border-radius: 5px;
+	text-align: center;
+	background-color: #37474F;
+	color: #FFFFFF;
+	font-size: 25px;
+	font-family: 'Roboto Mono', monospace;
+}
+section#Slots{
+	border-radius: 15px;
+	background-color: #FAFAFA;
+}
+section#Action{
+	margin-top: 5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border-radius: 5px;
+	text-align: center;
+	background-color: #AB47BC;
+	color: #FFFFFF;
+	font-size: 25px;
+}
+.Gira{
+	display: inline-block;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	padding-top: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+	border-radius: 5px;	
+	background-size: 150px;
+	width: 150px;
+	height: 50px;
+}
+.Gira:hover{
+	background-color: #BA68C8;
+}
+section#balance{
+	margin-top: 5px;
+	margin-bottom: 10px;
+	padding-top: 5px;
+	padding-bottom: 15px;
+	border-radius: 5px;
+	height: 20px;
+	text-align: center;
+	background-color: #37474F;
+	color: #FFFFFF;
+	font-size: 25px;
+	font-family: 'Roboto Mono', monospace;
+}
+section#options{
+	margin-top: 10px;
+	padding-top: 5px;
+	border-radius: 5px;
+	background-color: #C62828;
+	color: #FFFFFF;
+}
+.option{
+	padding-left: 5px;
+}
+section#info{
+	background-color: #616161;
+	padding-left: 12px;
+	padding-bottom: 12px;
+	border-radius: 5px;
+	overflow: hidden;
+	animation-duration: 1s;
+	color: #BDBDBD;
+	margin-top: 50px;
+	margin-left: 30%;
+	margin-right: 30%;
+	display: none;
+}
+#slot1, #slot2, #slot3{
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 15px;
+	margin-right: 15px;
+	background-size: 150px;
+	width: 150px;
+	height: 150px;
+}
+.a1{
+	background-image: url("res/tiles/seven.png");
+}
+.a2{
+	background-image: url("res/tiles/cherries.png");
+}
+.a3{
+	background-image: url("res/tiles/club.png");
+}
+.a4{
+	background-image: url("res/tiles/diamond.png");
+}
+.a5{
+	background-image: url("res/tiles/heart.png");
+}
+.a6{
+	background-image: url("res/tiles/spade.png");
+}
+.a0{
+	background-image: url("res/tiles/joker.png");
+}
+</style>
+	<script src="https://cdn.jsdelivr.net/npm/eosjs@16.0.9/lib/eos.min.js"></script>
+	<script src="https://cdn.scattercdn.com/file/scatter-cdn/js/latest/scatterjs-core.min.js"></script>
+	<script src="https://cdn.scattercdn.com/file/scatter-cdn/js/latest/scatterjs-plugin-eosjs.min.js"></script>
+</head>
+<html>
+<body onload="toggleAudio()">
+<main>
+	<section id="status">WELCOME! Please Login</section>
+	<section id="Slots">
+		<div id="slot1" class="a1"></div>
+		<div id="slot2" class="a1"></div>
+		<div id="slot3" class="a1"></div>
+	</section>
+	<section id="Action">
+		<!--<div id="login" class="Gira">LOGIN</div>-->
+		<div id="play" class="Gira">TAKE A SPIN</div>
+		<!--<div id="logout" class="Gira">LOGOUT</div>-->
+	</section>
+	<section id="balance"></section>
+	<section id="options">
+		<img src="res/icons/audioOn.png" id="audio" class="option" onclick="toggleAudio()" />		
+	</section>
+	<span>Visit us at <a href="https://koin4dapp.appspot.com">https://koin4dapp.appspot.com</a>, now @teloscopebot support Indonesian Language</span>
+</main>
+<div id="logger"></div>
+<section id="info">
+	<h3>Come si Gioca?</h3>
+	<p>Tenta la tua fortuna premendo il bottone! Il Jolly vale l'elemento mancante per vincere. Tre elementi uguali e vinici! Ma attenzione, non prendere tre Jolly o perderai!</p>
+	<h3>Licenza</h3>
+	<p><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Licenza Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />Quest'opera è distribuita con Licenza <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribuzione - Non commerciale - Condividi allo stesso modo 4.0 Internazionale</a>.</p>
+	<p>Eosio smart contract integration by https://koin4dapp.appspot.com</p>
+</section>
+<script>
+var doing = false;
+var spin = [new Audio("res/sounds/spin.mp3"),new Audio("res/sounds/spin.mp3"),new Audio("res/sounds/spin.mp3"),new Audio("res/sounds/spin.mp3"),new Audio("res/sounds/spin.mp3"),new Audio("res/sounds/spin.mp3"),new Audio("res/sounds/spin.mp3")];
+var coin = [new Audio("res/sounds/coin.mp3"),new Audio("res/sounds/coin.mp3"),new Audio("res/sounds/coin.mp3")]
+var win = new Audio("res/sounds/win.mp3");
+var lose = new Audio("res/sounds/lose.mp3");
+var audio = false;
+let status = elem("status");
+var info = true;
+
+function elem(id) {
+	return document.getElementById(id);
+}
+
+//elem("login").addEventListener('click',(e) => { login();}, false);
+elem("play").addEventListener('click',(e) => { doSlot();}, false);
+//elem("logout").addEventListener('click',(e) => { logout();}, false);
+
+setInterval(() => {setMemberStatus();}, 3000);
+
+function doSlot(){
+	if (doing){return null;}
+	doing = true;
+	var i1 = 0;
+	var i2 = 0;
+	var i3 = 0;
+	var sound = 0;
+	var numChanges = 7;
+	var numberSlot1,numberSlot2,numberSlot3;
+	var netResult="";
+	
+	play("1.0000 EOS", (result) =>{
+		netResult = result;
+		parseResult = result.split(":");
+		number = parseInt(parseResult[1]);
+		status.innerText = "SPINNING";
+		numberSlot3 = (number%10)+35;
+		numberSlot2 = (Math.floor(number/10)%10)+21;
+		numberSlot1 = (Math.floor(number/100)%10)+7;
+		slot1 = setInterval(spin1, 50);
+		slot2 = setInterval(spin2, 50);
+		slot3 = setInterval(spin3, 50);
+		}
+	);
+
+	function spin1(){
+		i1++;
+		if (i1>numberSlot1){
+			coin[0].play()
+			clearInterval(slot1);
+			return null;
+		}
+		slotTile = document.getElementById("slot1");
+		slotTile.className = "a"+(i1%7);
+	}
+	function spin2(){
+		i2++;
+		if (i2>numberSlot2){
+			coin[1].play()
+			clearInterval(slot2);
+			return null;
+		}
+		slotTile = document.getElementById("slot2");
+		slotTile.className = "a"+(i2%7);
+	}
+	function spin3(){
+		i3++;
+		if (i3>numberSlot3){
+			coin[2].play()
+			clearInterval(slot3);
+			showResult(netResult);
+			return null;
+		}
+		slotTile = document.getElementById("slot3");
+		sound++;
+		if (sound==spin.length){
+			sound=0;
+		}
+		spin[sound].play();
+		slotTile.className = "a"+(i3%7);
+	}
+}
+
+function showResult(netResult){
+	if (netResult.indexOf("won")>-1) {
+		status.innerText = "YOU WIN!";
+		win.play();
+	}else{
+		status.innerText = "YOU LOSE!"
+		lose.play();
+	}
+	doing = false;
+}
+
+function toggleAudio(){
+	if (!audio){
+		audio = !audio;
+		for (var x of spin){
+			x.volume = 0.5;
+		}
+		for (var x of coin){
+			x.volume = 0.5;
+		}
+		win.volume = 1.0;
+		lose.volume = 1.0;
+	}else{
+		audio = !audio;
+		for (var x of spin){
+			x.volume = 0;
+		}
+		for (var x of coin){
+			x.volume = 0;
+		}
+		win.volume = 0;
+		lose.volume = 0;
+	}
+	document.getElementById("audio").src = "res/icons/audio"+(audio?"On":"Off")+".png";
+}
+
+function randomInt(min, max){
+	return Math.floor((Math.random() * (max-min+1)) + min);
+}
+</script>
+<script>
+	const endpoint = "https://api-kylin.eosasia.one";
+	
+	//initialize your variabel
+	var lynx, lynxAccountName, lynxAccountAuthority;
+	// Add an event listener to be to set variable
+	// once the lynxMobile object has been inject to window.
+	window.addEventListener("lynxMobileLoaded", function() {
+		// lynx is on the window and ready!
+		lynx=true;
+		lynxAccountAuthority='active';
+		(async () => {
+			let result;
+			try {
+				result = await window.lynxMobile.requestSetAccountName(); //await return promise
+			} catch (err) {
+				console.log(err);
+			}
+			lynxAccountName=result;
+			elem("accountname").innerText = lynxAccountName;
+		})();
+	});
+	
+
+	function setMemberStatus() {
+		if (lynx) {
+			if (!doing) //pending show balance on Spin
+				getCurrencyBalance("eosio.token",getAccountName(),"EOS", (x) =>{if (x) {elem("balance").innerText = "Your Balance: " + x}});
+		}
+	}
+	
+	function getAccountName() {
+		if (lynx)
+			return lynxAccountName;
+		else
+			return "unknown";
+	}
+
+	function getAccountAuthority() {
+		if (lynx)
+			return lynxAccountAuthority;
+		else
+			return "unknown";
+	}
+	
+	function getCurrencyBalance(contract, name, symbol, callback, callbackerror) {
+		var data = "{\"code\":\""+ contract +"\",\"account\":\""+name+"\",\"symbol\":\""+symbol+"\"}";
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener("readystatechange", function () {
+		  if (this.readyState === this.DONE) {
+			result = JSON.parse(this.responseText);
+			if (result.hasOwnProperty('error'))
+				callback(result[0]);
+			else {
+				if (callbackerror)
+					callbackerror(result.details[0].message);
+				else
+					console.log('error:'+JSON.stringify(result.details[0].message));
+				}
+			}
+		});
+		xhr.open("POST", endpoint + "/v1/chain/get_currency_balance");
+		xhr.setRequestHeader("accept", "application/json");
+		xhr.setRequestHeader("content-type", "application/json");
+	}	
+	
+	function error2String(obj) {
+		if (typeof obj === 'string' || obj instanceof String) 
+			return obj;
+		else
+			return JSON.stringify(obj);
+	}
+
+	function doAction(obj, callback) {
+		if (!lynx) {
+			alert('No Lynx Mobile Wallet detected!');
+		} else {
+			(async () => {
+				let result;
+				try {
+					result = await window.lynxMobile.transact({actions:obj});
+					callback(result);
+				} catch (error) {
+					alert(error2String(error));
+				}
+			})();
+		}
+	}
+	
+	function play(quantity, callback) {	
+		doAction([
+				{
+					account: 'eosio.token',
+					name:    'transfer',
+					authorization: [{
+						actor:      getAccountName(),
+						permission: getAccountAuthority()
+					}],
+					data: {
+						from: getAccountName(),
+						to: 'slotmachine1',
+						quantity: quantity,
+						memo: 'play ' + quantity
+					}
+				}
+		], function(result){
+			console.log(JSON.stringify(result));
+			const logger = elem("logger");
+			traces2 = result.processed.action_traces[0].inline_traces[2];
+			memo = traces2.act.data.memo;
+			callback(memo);
+			}
+		);
+	}
+</script>
+</body>
+</html>
